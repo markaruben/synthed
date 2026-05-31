@@ -37,17 +37,12 @@ const goToLogin = () => router.push("/login");
           <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium small gap-lg-4">
             <li class="nav-item">
               <a class="nav-link text-secondary hover-dark" href="#features"
-                >Funcționalități</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-secondary hover-dark" href="#pricing"
-                >Prețuri</a
+                >Arhitectură & Funcționalități</a
               >
             </li>
             <li class="nav-item">
               <a class="nav-link text-secondary hover-dark" href="#faq"
-                >Întrebări</a
+                >Detalii Tehnice (FAQ)</a
               >
             </li>
           </ul>
@@ -56,13 +51,13 @@ const goToLogin = () => router.push("/login");
               class="btn btn-link text-decoration-none text-dark fw-bold px-3"
               @click="goToLogin"
             >
-              Login
+              Autentificare
             </button>
             <button
               class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm btn-hover-lift"
               @click="goToRegister"
             >
-              Începe Gratuit
+              Accesează Platforma
             </button>
           </div>
         </div>
@@ -79,18 +74,20 @@ const goToLogin = () => router.push("/login");
             <div
               class="d-inline-flex align-items-center border border-dark border-opacity-10 bg-white px-3 py-1 rounded-pill mb-4 small fw-bold shadow-sm"
             >
-              <span class="dot bg-success me-2 animate-pulse"></span> v1.0
-              Lansare Publică
+              <span class="dot bg-success me-2 animate-pulse"></span> Prototip
+              Academic v1.0
             </div>
 
             <h1 class="display-4 fw-bolder text-dark mb-4 lh-sm tracking-tight">
-              Transformă cursurile în <br />
-              <span class="text-gradient">Superputeri.</span>
+              Sinteza cursurilor <br />
+              asistată de
+              <span class="text-gradient">Inteligența Artificială.</span>
             </h1>
 
             <p class="lead text-secondary mb-5">
-              AI-ul SynthEd citește, sintetizează și transformă PDF-urile tale
-              în Flashcard-uri interactive în mai puțin de 30 de secunde.
+              Platformă experimentală dezvoltată pentru procesarea, analizarea
+              și transformarea automată a documentelor educaționale în
+              Flashcard-uri interactive folosind modele LLM.
             </p>
 
             <div
@@ -100,21 +97,22 @@ const goToLogin = () => router.push("/login");
                 @click="goToRegister"
                 class="btn btn-dark btn-lg rounded-pill px-5 fw-bold shadow-lg btn-hover-scale"
               >
-                Creează Cont
+                Testare Sistem
               </button>
               <button
                 class="btn btn-white border btn-lg rounded-pill px-4 fw-medium text-dark shadow-sm"
               >
-                <i class="fas fa-play me-2 text-muted"></i> Demo Video
+                <i class="fas fa-file-pdf me-2 text-muted"></i> Vezi
+                Documentația
               </button>
             </div>
 
-            <div class="mt-5 text-muted small">
-              <i class="fas fa-check-circle text-success me-1"></i> Nu necesită
-              card bancar
+            <div class="mt-5 text-muted small fw-medium">
+              <i class="fas fa-shield-alt text-success me-1"></i> Procesare
+              Securizată
               <span class="mx-2">•</span>
-              <i class="fas fa-check-circle text-success me-1"></i> Anulare
-              oricând
+              <i class="fas fa-network-wired text-success me-1"></i> Arhitectură
+              AI Hibridă
             </div>
           </div>
 
@@ -170,10 +168,10 @@ const goToLogin = () => router.push("/login");
                       </div>
                       <div>
                         <div class="fw-bold text-dark small">
-                          AI Analysis Complete
+                          JSON Parsat cu Succes
                         </div>
                         <div class="text-muted" style="font-size: 0.7rem">
-                          Generated 42 flashcards
+                          Tokeni procesați: 4,096
                         </div>
                       </div>
                     </div>
@@ -189,22 +187,22 @@ const goToLogin = () => router.push("/login");
     <div class="py-4 bg-white border-top border-bottom overflow-hidden">
       <div class="container text-center">
         <p class="small fw-bold text-uppercase text-muted mb-4 tracking-widest">
-          Folosit de studenți de la
+          Mediu Tehnologic Utilizat
         </p>
         <div
           class="d-flex justify-content-center align-items-center flex-wrap gap-5 opacity-50 grayscale-logos"
         >
           <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fas fa-university"></i> POLITEHNICA
+            <i class="fab fa-vuejs"></i> Vue.js 3
           </div>
           <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fas fa-graduation-cap"></i> UNIVERSITATEA BUC.
+            <i class="fab fa-java"></i> Spring Boot
           </div>
           <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fas fa-book-medical"></i> UMF CAROL DAVILA
+            <i class="fas fa-database"></i> PostgreSQL
           </div>
           <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fas fa-balance-scale"></i> ASE
+            <i class="fas fa-robot"></i> OpenAI API
           </div>
         </div>
       </div>
@@ -213,10 +211,10 @@ const goToLogin = () => router.push("/login");
     <section id="features" class="py-5 bg-light">
       <div class="container py-5">
         <div class="text-center mb-5 mw-600 mx-auto">
-          <h2 class="fw-bold display-6 mb-3">Tot ce ai nevoie pentru 10.</h2>
+          <h2 class="fw-bold display-6 mb-3">Arhitectura Sistemului.</h2>
           <p class="text-secondary lead">
-            Am eliminat partea plictisitoare a învățatului. Tu doar încarci
-            PDF-ul, noi facem restul.
+            Soluția tehnică integrează procesarea robustă a documentelor cu
+            determinismul structural al modelelor de limbaj moderne.
           </p>
         </div>
 
@@ -224,53 +222,58 @@ const goToLogin = () => router.push("/login");
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
               <div class="icon-box bg-primary bg-opacity-10 text-primary mb-4">
-                <i class="fas fa-bolt"></i>
+                <i class="fas fa-cogs"></i>
               </div>
-              <h5 class="fw-bold">Viteză Instantanee</h5>
+              <h5 class="fw-bold">Extracție Date (PDFBox)</h5>
               <p class="text-muted small">
-                Algoritmul nostru procesează 100 de pagini în sub 60 de secunde
-                folosind procesare paralelă.
+                Utilizarea bibliotecii Apache PDFBox pentru parsarea și
+                extragerea textului brut din documentele încărcate, pregătind
+                datele pentru faza de inferență.
               </p>
             </div>
           </div>
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
               <div class="icon-box bg-success bg-opacity-10 text-success mb-4">
-                <i class="fas fa-brain"></i>
+                <i class="fas fa-code-branch"></i>
               </div>
-              <h5 class="fw-bold">Context Semantic</h5>
+              <h5 class="fw-bold">Determinism JSON</h5>
               <p class="text-muted small">
-                AI-ul nu extrage doar cuvinte cheie. Înțelege contextul și
-                generează întrebări logice.
+                Implementarea tehnicilor avansate de Prompt Engineering și JSON
+                Mode pentru a garanta structura datelor primite de la agentul
+                AI.
               </p>
             </div>
           </div>
           <div class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
               <div class="icon-box bg-warning bg-opacity-10 text-warning mb-4">
-                <i class="fas fa-mobile-alt"></i>
+                <i class="fas fa-lock"></i>
               </div>
-              <h5 class="fw-bold">Mobile Ready</h5>
+              <h5 class="fw-bold">Securitate REST API</h5>
               <p class="text-muted small">
-                Învață în metrou sau în pauze. Interfața este optimizată perfect
-                pentru orice telefon.
+                Comunicația între interfața clientului și backend este protejată
+                prin mecanisme standard de autentificare și validare a
+                token-urilor.
               </p>
             </div>
           </div>
+
           <div class="col-lg-8">
             <div
               class="card h-100 border-0 shadow-sm p-5 rounded-4 bg-dark text-white position-relative overflow-hidden"
             >
               <div class="position-relative z-2">
-                <h3 class="fw-bold mb-3">Securitate Enterprise</h3>
+                <h3 class="fw-bold mb-3">Privacy & Data Flow</h3>
                 <p class="text-white-50 mb-0" style="max-width: 500px">
-                  Documentele tale sunt criptate AES-256 și sunt șterse automat
-                  după procesare. Nimeni (nici noi) nu are acces la cursurile
-                  tale.
+                  Documentele utilizatorilor sunt procesate tranzitoriu. Textul
+                  este mapat prin intermediul DTO-urilor, trimis secvențial
+                  către API-ul LLM, și stocat relațional exclusiv pentru
+                  sesiunea de studiu a utilizatorului autentificat.
                 </p>
               </div>
               <i
-                class="fas fa-shield-alt position-absolute bottom-0 end-0 text-white opacity-10"
+                class="fas fa-server position-absolute bottom-0 end-0 text-white opacity-10"
                 style="font-size: 15rem; transform: translate(20%, 20%)"
               ></i>
             </div>
@@ -279,110 +282,21 @@ const goToLogin = () => router.push("/login");
             <div
               class="card h-100 border-0 shadow-sm p-4 rounded-4 bg-primary text-white text-center d-flex flex-column justify-content-center align-items-center hover-scale"
             >
-              <h1 class="fw-bolder mb-0">98%</h1>
-              <p class="text-white-50">Rată de succes la examene</p>
+              <i class="fas fa-microchip fs-1 mb-3 opacity-75"></i>
+              <h3 class="fw-bolder mb-0">GPT-4o</h3>
+              <p class="text-white-50 small mt-2">Model de Infernță Integrat</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="pricing" class="py-5 bg-white border-top">
-      <div class="container py-5">
-        <div class="text-center mb-5">
-          <h2 class="fw-bold">Investiție mică, rezultate mari.</h2>
-          <p class="text-muted">Alege planul care ți se potrivește.</p>
-        </div>
-
-        <div class="row g-4 justify-content-center">
-          <div class="col-md-5 col-lg-4">
-            <div class="card h-100 border rounded-4 p-4 shadow-none">
-              <div class="mb-4">
-                <h5 class="fw-bold text-secondary">Student Starter</h5>
-                <h2 class="fw-bold display-5">
-                  0 RON <span class="fs-6 text-muted fw-normal">/ lună</span>
-                </h2>
-                <p class="text-muted small mt-2">
-                  Perfect pentru a testa platforma.
-                </p>
-              </div>
-              <ul class="list-unstyled mb-4 small d-flex flex-column gap-3">
-                <li>
-                  <i class="fas fa-check text-success me-2"></i> 3 Documente /
-                  lună
-                </li>
-                <li>
-                  <i class="fas fa-check text-success me-2"></i> Max 20 pagini /
-                  PDF
-                </li>
-                <li>
-                  <i class="fas fa-check text-success me-2"></i> Export text
-                  simplu
-                </li>
-              </ul>
-              <button
-                @click="goToRegister"
-                class="btn btn-outline-dark w-100 rounded-pill fw-bold mt-auto"
-              >
-                Începe Gratuit
-              </button>
-            </div>
-          </div>
-
-          <div class="col-md-5 col-lg-4">
-            <div
-              class="card h-100 border-primary border-2 rounded-4 p-4 shadow-lg position-relative"
-            >
-              <div
-                class="position-absolute top-0 start-50 translate-middle badge bg-primary px-3 py-2 rounded-pill shadow-sm"
-              >
-                CEL MAI POPULAR
-              </div>
-              <div class="mb-4 mt-2">
-                <h5 class="fw-bold text-primary">Sesiune Pro</h5>
-                <h2 class="fw-bold display-5">
-                  25 RON <span class="fs-6 text-muted fw-normal">/ lună</span>
-                </h2>
-                <p class="text-muted small mt-2">
-                  Pentru studenții care vor nota 10.
-                </p>
-              </div>
-              <ul class="list-unstyled mb-4 small d-flex flex-column gap-3">
-                <li>
-                  <i class="fas fa-check text-success me-2"></i>
-                  <strong>Nelimitat</strong> Documente
-                </li>
-                <li>
-                  <i class="fas fa-check text-success me-2"></i> Max 500 pagini
-                  / PDF
-                </li>
-                <li>
-                  <i class="fas fa-check text-success me-2"></i> GPT-4o Advanced
-                  Mode
-                </li>
-                <li>
-                  <i class="fas fa-check text-success me-2"></i> Suport
-                  Prioritar
-                </li>
-              </ul>
-              <button
-                @click="goToRegister"
-                class="btn btn-primary w-100 rounded-pill fw-bold mt-auto shadow-primary"
-              >
-                Activează Pro
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="faq" class="py-5 bg-light">
+    <section id="faq" class="py-5 bg-white border-top">
       <div class="container py-4 mw-800 mx-auto">
-        <h3 class="fw-bold text-center mb-5">Întrebări Frecvente</h3>
+        <h3 class="fw-bold text-center mb-5">Detalii Tehnice</h3>
 
         <div
-          class="accordion accordion-flush bg-white rounded-4 shadow-sm"
+          class="accordion accordion-flush bg-white rounded-4 shadow-sm border"
           id="accordionFAQ"
         >
           <div class="accordion-item rounded-top-4">
@@ -393,7 +307,7 @@ const goToLogin = () => router.push("/login");
                 data-bs-toggle="collapse"
                 data-bs-target="#flush-collapseOne"
               >
-                Funcționează cu PDF-uri scanate?
+                Ce model de Inteligență Artificială folosiți?
               </button>
             </h2>
             <div
@@ -402,9 +316,10 @@ const goToLogin = () => router.push("/login");
               data-bs-parent="#accordionFAQ"
             >
               <div class="accordion-body text-muted small">
-                Da! Folosim tehnologie OCR (Optical Character Recognition)
-                avansată pentru a extrage textul chiar și din poze sau scanări
-                vechi.
+                Platforma utilizează modele LLM de ultimă generație (ex: OpenAI
+                API gpt-4o-mini) integrate în backend-ul Java Spring Boot.
+                Modelul este constrâns arhitectural să răspundă strict în format
+                JSON pentru o parsare robustă.
               </div>
             </div>
           </div>
@@ -416,7 +331,7 @@ const goToLogin = () => router.push("/login");
                 data-bs-toggle="collapse"
                 data-bs-target="#flush-collapseTwo"
               >
-                Pot să îmi șterg contul?
+                Cum sunt gestionate limitările de context (Context Window)?
               </button>
             </h2>
             <div
@@ -425,8 +340,10 @@ const goToLogin = () => router.push("/login");
               data-bs-parent="#accordionFAQ"
             >
               <div class="accordion-body text-muted small">
-                Absolut. Datele tale îți aparțin. Poți șterge contul și toate
-                documentele asociate instantaneu din setările profilului.
+                În versiunea curentă a prototipului, textul extras din documente
+                este limitat la un număr maxim de caractere sigure pentru a
+                preveni erorile de tip "Token Limit Exceeded". Ca direcție
+                viitoare, se propune o arhitectură RAG cu Semantic Chunking.
               </div>
             </div>
           </div>
@@ -438,7 +355,7 @@ const goToLogin = () => router.push("/login");
                 data-bs-toggle="collapse"
                 data-bs-target="#flush-collapseThree"
               >
-                Oferiți reduceri pentru grupuri?
+                Care este fluxul de prelucrare a unui document?
               </button>
             </h2>
             <div
@@ -447,8 +364,10 @@ const goToLogin = () => router.push("/login");
               data-bs-parent="#accordionFAQ"
             >
               <div class="accordion-body text-muted small">
-                Da, dacă ești reprezentant de an sau ligă studențească,
-                contactează-ne pentru o ofertă personalizată.
+                1. Încărcare din Client (Vue.js) -> 2. Controller REST (Spring
+                Boot) -> 3. Extragere text (PDFBox) -> 4. Generare Prompt
+                (AiService) -> 5. Răspuns AI și Parsare JSON (Jackson) -> 6.
+                Persistență (PostgreSQL) -> 7. Randare interactivă UI.
               </div>
             </div>
           </div>
@@ -459,94 +378,72 @@ const goToLogin = () => router.push("/login");
     <footer class="bg-dark text-white pt-5 pb-4">
       <div class="container">
         <div class="row g-4 mb-5">
-          <div class="col-lg-4">
+          <div class="col-lg-5">
             <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
-              <i class="fas fa-brain text-primary"></i> SynthEd
+              <i class="fas fa-graduation-cap text-primary"></i> SynthEd
             </h5>
-            <p class="text-white-50 small">
-              Platforma #1 din România pentru învățare asistată de AI. Dezvoltat
-              cu pasiune pentru studenți.
+            <p class="text-white-50 small pe-lg-5">
+              Acest proiect reprezintă o aplicație practică dezvoltată pentru
+              lucrarea de disertație, demonstrând integrarea arhitecturilor web
+              moderne cu inteligența artificială generativă.
             </p>
-            <div class="d-flex gap-3">
-              <a href="#" class="text-white-50 hover-white"
-                ><i class="fab fa-twitter"></i
-              ></a>
-              <a href="#" class="text-white-50 hover-white"
-                ><i class="fab fa-instagram"></i
-              ></a>
-              <a href="#" class="text-white-50 hover-white"
-                ><i class="fab fa-linkedin"></i
-              ></a>
-            </div>
           </div>
-          <div class="col-6 col-lg-2">
-            <h6 class="fw-bold mb-3">Produs</h6>
+          <div class="col-6 col-lg-3">
+            <h6 class="fw-bold mb-3">Arhitectură</h6>
             <ul
               class="list-unstyled small text-white-50 d-flex flex-column gap-2"
             >
               <li>
                 <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Funcționalități</a
+                  >Frontend (Vue 3)</a
                 >
               </li>
               <li>
                 <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Prețuri</a
+                  >Backend (Spring Boot)</a
                 >
               </li>
               <li>
                 <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Pentru Profesori</a
+                  >Bază de date (PostgreSQL)</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-reset text-decoration-none hover-white"
+                  >Integrare LLM</a
                 >
               </li>
             </ul>
           </div>
-          <div class="col-6 col-lg-2">
-            <h6 class="fw-bold mb-3">Companie</h6>
+          <div class="col-6 col-lg-4">
+            <h6 class="fw-bold mb-3">Informații Academice</h6>
             <ul
               class="list-unstyled small text-white-50 d-flex flex-column gap-2"
             >
               <li>
                 <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Despre Noi</a
+                  ><i class="fas fa-file-alt me-2"></i>Documentație Proiect</a
                 >
               </li>
               <li>
                 <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Blog</a
+                  ><i class="fab fa-github me-2"></i>Cod Sursă</a
                 >
               </li>
               <li>
                 <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Contact</a
+                  ><i class="fas fa-envelope me-2"></i>Contact Student</a
                 >
               </li>
             </ul>
-          </div>
-          <div class="col-lg-4">
-            <h6 class="fw-bold mb-3">Abonează-te la noutăți</h6>
-            <div class="input-group">
-              <input
-                type="email"
-                class="form-control border-0"
-                placeholder="Email-ul tău..."
-              />
-              <button class="btn btn-primary fw-bold">Trimite</button>
-            </div>
           </div>
         </div>
 
         <div
-          class="border-top border-secondary pt-4 d-flex flex-column flex-md-row justify-content-between align-items-center small text-white-50"
+          class="border-top border-secondary pt-4 text-center small text-white-50"
         >
-          <div>&copy; 2026 SynthEd Inc. Toate drepturile rezervate.</div>
-          <div class="d-flex gap-3 mt-3 mt-md-0">
-            <a href="#" class="text-reset text-decoration-none"
-              >Privacy Policy</a
-            >
-            <a href="#" class="text-reset text-decoration-none"
-              >Terms of Service</a
-            >
+          <div>
+            &copy; 2026 Proiect de Disertație. Toate drepturile rezervate.
           </div>
         </div>
       </div>

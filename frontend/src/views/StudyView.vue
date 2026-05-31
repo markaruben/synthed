@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
 import confetti from "canvas-confetti";
 
 const route = useRoute();
@@ -9,6 +10,12 @@ const documentId = route.params.id;
 
 const doc = ref(null);
 const loading = ref(true);
+const error = ref(null);
+
+const allCards = ref([]);
+const activeCards = ref([]);
+const missedCards = ref([]);
+
 const currentIndex = ref(0);
 const isFlipped = ref(false);
 const isFinished = ref(false);
@@ -19,24 +26,45 @@ const stats = ref({
 });
 
 const currentCard = computed(() => {
-  if (!doc.value || !doc.value.flashcards || doc.value.flashcards.length === 0)
-    return null;
-  return doc.value.flashcards[currentIndex.value];
+  if (!activeCards.value || activeCards.value.length === 0) return null;
+  return activeCards.value[currentIndex.value];
 });
 
 const fetchDocumentDetails = async () => {
   loading.value = true;
-  setTimeout(() => {
-    doc.value = {
-      id: 123,
-      fileName: "Curs_IA_Test.pdf",
-      flashcards: [
-        { id: 1, question: "Test 1", answer: "Raspuns 1" },
-        { id: 2, question: "Test 2", answer: "Raspuns 2" },
-      ],
-    };
+  error.value = null;
+
+  const authHeader = localStorage.getItem("auth");
+  if (!authHeader) {
+    router.push("/");
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/api/documents/${documentId}`,
+      {
+        headers: { Authorization: authHeader },
+      },
+    );
+
+    doc.value = response.data;
+
+    if (doc.value.flashcards && doc.value.flashcards.length > 0) {
+      allCards.value = doc.value.flashcards;
+      activeCards.value = [...allCards.value];
+    } else {
+      error.value = "Acest curs nu are încă flashcard-uri generate.";
+    }
+  } catch (err) {
+    console.error("Eroare la preluarea datelor:", err);
+    error.value = "Nu am putut încărca flashcard-urile.";
+    if (err.response && err.response.status === 401) {
+      router.push("/");
+    }
+  } finally {
     loading.value = false;
-  }, 500);
+  }
 };
 
 const flipCard = () => {
@@ -44,13 +72,14 @@ const flipCard = () => {
 };
 
 const handleAnswer = (difficulty) => {
-  if (difficulty === "easy") stats.value.easy++;
-  else if (difficulty === "hard") stats.value.hard++;
+  if (difficulty === "easy") {
+    stats.value.easy++;
+  } else if (difficulty === "hard") {
+    stats.value.hard++;
+    missedCards.value.push(activeCards.value[currentIndex.value]);
+  }
 
-  if (
-    doc.value.flashcards &&
-    currentIndex.value < doc.value.flashcards.length - 1
-  ) {
+  if (currentIndex.value < activeCards.value.length - 1) {
     isFlipped.value = false;
     setTimeout(() => {
       currentIndex.value++;
@@ -62,10 +91,23 @@ const handleAnswer = (difficulty) => {
 
 const finishSession = () => {
   isFinished.value = true;
-  triggerConfetti();
+  if (missedCards.value.length === 0) {
+    triggerConfetti();
+  }
+};
+
+const reviewMissed = () => {
+  activeCards.value = [...missedCards.value];
+  missedCards.value = [];
+  currentIndex.value = 0;
+  isFlipped.value = false;
+  isFinished.value = false;
+  stats.value = { easy: 0, hard: 0 };
 };
 
 const restartSession = () => {
+  activeCards.value = [...allCards.value];
+  missedCards.value = [];
   currentIndex.value = 0;
   isFlipped.value = false;
   isFinished.value = false;
@@ -73,21 +115,16 @@ const restartSession = () => {
 };
 
 const triggerConfetti = () => {
-  const duration = 3000; // Durează 3 secunde
+  const duration = 3000;
   const animationEnd = Date.now() + duration;
   const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
   const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
   const interval = setInterval(function () {
     const timeLeft = animationEnd - Date.now();
-
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
-    }
+    if (timeLeft <= 0) return clearInterval(interval);
 
     const particleCount = 50 * (timeLeft / duration);
-
     confetti({
       ...defaults,
       particleCount,
@@ -140,12 +177,10 @@ onUnmounted(() => {
 
         <div
           class="flex-grow-1 mx-3 d-none d-md-flex gap-1"
-          v-if="
-            doc && doc.flashcards && doc.flashcards.length > 0 && !isFinished
-          "
+          v-if="activeCards.length > 0 && !isFinished"
         >
           <div
-            v-for="(c, idx) in doc.flashcards"
+            v-for="(c, idx) in activeCards"
             :key="idx"
             class="progress-segment rounded-pill"
             :class="{
@@ -157,9 +192,9 @@ onUnmounted(() => {
 
         <div
           class="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill"
-          v-if="doc && doc.flashcards && doc.flashcards.length > 0"
+          v-if="activeCards.length > 0 && !isFinished"
         >
-          {{ currentIndex + 1 }} / {{ doc.flashcards.length }}
+          {{ currentIndex + 1 }} / {{ activeCards.length }}
         </div>
       </div>
     </nav>
@@ -204,62 +239,51 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div
-        v-else-if="isFinished"
-        class="text-center position-relative z-1 animate-pop-in"
-      >
+      <div v-else-if="isFinished" class="text-center py-5">
+        <div class="mb-4">
+          <i
+            v-if="missedCards.length === 0"
+            class="fas fa-trophy text-warning"
+            style="font-size: 5rem"
+          ></i>
+          <i
+            v-else
+            class="fas fa-tasks text-primary"
+            style="font-size: 5rem"
+          ></i>
+        </div>
+        <h2 class="fw-bold mb-3">
+          {{
+            missedCards.length === 0
+              ? "Felicitări! Ai reținut tot!"
+              : "Sesiune finalizată"
+          }}
+        </h2>
+        <p class="text-secondary mb-5">
+          Ai parcurs {{ activeCards.length }} carduri în această rundă.
+        </p>
+
         <div
-          class="bg-white p-5 rounded-5 shadow-lg border text-center"
-          style="max-width: 500px"
+          class="d-flex flex-column flex-sm-row justify-content-center gap-3 max-w-400 mx-auto"
         >
-          <div
-            class="icon-circle bg-success bg-opacity-10 text-success mx-auto mb-4"
-            style="width: 80px; height: 80px; font-size: 2rem"
+          <button
+            v-if="missedCards.length > 0"
+            @click="reviewMissed"
+            class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm px-4"
           >
-            <i class="fas fa-trophy"></i>
-          </div>
-          <h2 class="fw-bold mb-2">Sesiune Completă!</h2>
-          <p class="text-muted mb-4">
-            Ai parcurs toate conceptele din acest curs.
-          </p>
+            <i class="fas fa-redo me-2"></i> Repetă cardurile greșite ({{
+              missedCards.length
+            }})
+          </button>
 
-          <div class="row g-3 mb-4">
-            <div class="col-6">
-              <div class="p-3 bg-light rounded-4 border">
-                <div class="fw-bold text-success">{{ stats.easy }}</div>
-                <small
-                  class="text-muted text-uppercase"
-                  style="font-size: 0.7rem"
-                  >Ușoare</small
-                >
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="p-3 bg-light rounded-4 border">
-                <div class="fw-bold text-warning">{{ stats.hard }}</div>
-                <small
-                  class="text-muted text-uppercase"
-                  style="font-size: 0.7rem"
-                  >Dificile</small
-                >
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex gap-2">
-            <button
-              @click="router.push('/dashboard')"
-              class="btn btn-outline-secondary flex-grow-1 rounded-3 fw-bold"
-            >
-              Dashboard
-            </button>
-            <button
-              @click="restartSession"
-              class="btn btn-primary flex-grow-1 rounded-3 fw-bold shadow-sm"
-            >
-              Învață din nou
-            </button>
-          </div>
+          <button
+            @click="restartSession"
+            class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
+          >
+            <i class="fas fa-sync-alt me-2"></i> Începe de la zero ({{
+              allCards.length
+            }})
+          </button>
         </div>
       </div>
 

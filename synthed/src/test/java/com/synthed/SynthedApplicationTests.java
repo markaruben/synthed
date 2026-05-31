@@ -1,4 +1,4 @@
-package com.disertatie.synthed;
+package com.synthed;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
