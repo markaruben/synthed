@@ -1,8 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
-
+import api from "@/services/api";
 const router = useRouter();
 const username = localStorage.getItem("user") || "Student";
 const documents = ref([]);
@@ -10,26 +9,21 @@ const selectedFile = ref(null);
 const isUploading = ref(false);
 
 const fetchDocuments = async () => {
-  const authHeader = localStorage.getItem("auth");
-  if (!authHeader) {
-    router.push("/");
-    return;
-  }
   try {
-    const response = await axios.get("http://localhost:8080/api/documents", {
-      headers: { Authorization: authHeader },
-    });
+    const response = await api.get("/documents");
     documents.value = response.data;
   } catch (error) {
-    if (error.response && error.response.status === 401) logout();
+    console.error("Eroare la aducerea documentelor", error);
   }
 };
 
 const logout = () => {
   localStorage.removeItem("auth");
   localStorage.removeItem("user");
-  window.addToast("Te-ai delogat cu succes.", "success");
-  router.push("/");
+  if (window.addToast) {
+    window.addToast("Te-ai delogat cu succes.", "success");
+  }
+  router.push("/login");
 };
 
 const handleFileSelect = (event) => {
@@ -40,30 +34,27 @@ const uploadDocument = async () => {
   if (!selectedFile.value) return;
 
   if (selectedFile.value.type !== "application/pdf") {
-    window.addToast("Te rugăm să încarci doar fișiere PDF.", "error");
+    if (window.addToast)
+      window.addToast("Te rugăm să încarci doar fișiere PDF.", "error");
     return;
   }
 
   isUploading.value = true;
-  const authHeader = localStorage.getItem("auth");
   const formData = new FormData();
   formData.append("file", selectedFile.value);
 
   try {
-    await axios.post("http://localhost:8080/api/documents/upload", formData, {
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    await api.post("/documents/upload", formData);
 
-    window.addToast("Curs procesat și generat cu succes!", "success");
+    if (window.addToast)
+      window.addToast("Curs procesat și generat cu succes!", "success");
 
     selectedFile.value = null;
     document.getElementById("fileInput").value = "";
     await fetchDocuments();
   } catch (error) {
-    window.addToast("Eroare la procesarea fișierului.", "error");
+    if (window.addToast)
+      window.addToast("Eroare la procesarea fișierului.", "error");
   } finally {
     isUploading.value = false;
   }
@@ -72,16 +63,21 @@ const uploadDocument = async () => {
 const deleteDocument = async (id) => {
   if (!confirm("Sigur vrei să ștergi acest curs?")) return;
 
-  const authHeader = localStorage.getItem("auth");
   try {
-    await axios.delete(`http://localhost:8080/api/documents/${id}`, {
-      headers: { Authorization: authHeader },
-    });
+    await api.delete(`/documents/${id}`);
 
-    window.addToast("Curs șters definitiv.", "success");
+    if (window.addToast) window.addToast("Curs șters definitiv.", "success");
     await fetchDocuments();
   } catch (e) {
-    window.addToast("Nu s-a putut șterge cursul.", "error");
+    if (window.addToast)
+      window.addToast("Nu s-a putut șterge cursul.", "error");
+  }
+};
+const clearFile = () => {
+  selectedFile.value = null;
+  const fileInput = document.getElementById("fileInput");
+  if (fileInput) {
+    fileInput.value = "";
   }
 };
 
@@ -160,8 +156,7 @@ onMounted(() => {
                 <i class="fas fa-layer-group"></i>
               </div>
               <div class="fs-2 fw-bolder text-dark mt-2">
-                {{ documents.length * 15
-                }}<span class="fs-6 text-muted">+</span>
+                {{ documents.length * 5 }}<span class="fs-6 text-muted">+</span>
               </div>
               <div
                 class="text-muted small fw-bold text-uppercase"
@@ -223,8 +218,13 @@ onMounted(() => {
                       </div>
                     </div>
                     <button
-                      @click="selectedFile = null"
+                      @click="clearFile"
                       class="btn btn-link text-muted ms-auto p-0"
+                      style="
+                        border: 2px solid white !important;
+                        z-index: 9999 !important;
+                        position: relative;
+                      "
                     >
                       <i class="fas fa-times"></i>
                     </button>

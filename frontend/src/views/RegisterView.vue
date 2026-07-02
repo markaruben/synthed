@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import api from "@/services/api";
 
 const router = useRouter();
 
@@ -14,38 +14,59 @@ const form = ref({
 });
 
 const isLoading = ref(false);
+const errorMessage = ref("");
+
+const touched = ref({
+  username: false,
+  email: false,
+  password: false,
+  confirmPassword: false,
+});
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const isUsernameValid = computed(() => form.value.username.trim().length >= 3);
+const isEmailValid = computed(() => emailRegex.test(form.value.email));
+const isPasswordValid = computed(() => form.value.password.length >= 6);
+const doPasswordsMatch = computed(
+  () =>
+    isPasswordValid.value && form.value.password === form.value.confirmPassword,
+);
+
+const isFormValid = computed(
+  () =>
+    isUsernameValid.value &&
+    isEmailValid.value &&
+    isPasswordValid.value &&
+    doPasswordsMatch.value &&
+    form.value.agreed,
+);
 
 const goHome = () => router.push("/");
 
 const handleRegister = async () => {
-  if (form.value.password !== form.value.confirmPassword) {
-    window.addToast("Parolele nu coincid!", "error");
-    return;
-  }
-  if (!form.value.agreed) {
-    window.addToast("Te rugăm să accepți Termenii și Condițiile.", "error");
-    return;
-  }
+  if (!isFormValid.value) return;
 
   isLoading.value = true;
+  errorMessage.value = "";
 
   try {
-    await axios.post("http://localhost:8080/api/auth/register", {
+    await api.post("/auth/register", {
       username: form.value.username,
       email: form.value.email,
       password: form.value.password,
     });
 
-    window.addToast("Cont creat cu succes! Te poți autentifica.", "success");
+    if (window.addToast) {
+      window.addToast("Cont creat cu succes! Te poți autentifica.", "success");
+    }
     router.push("/login");
   } catch (error) {
     console.error(error);
-    const msg =
+    errorMessage.value =
       error.response && typeof error.response.data === "string"
         ? error.response.data
         : "Eroare la înregistrare. Încearcă alt username.";
-
-    window.addToast(msg, "error");
   } finally {
     isLoading.value = false;
   }
@@ -93,18 +114,34 @@ const handleRegister = async () => {
               class="form-label small fw-bold text-secondary text-uppercase tracking-wide"
               >Username</label
             >
-            <div class="input-group">
+            <div
+              class="input-group"
+              :class="{
+                'is-invalid-group': !isUsernameValid && touched.username,
+              }"
+            >
               <span
                 class="input-group-text bg-white border-end-0 text-muted ps-3"
                 ><i class="fas fa-user"></i
               ></span>
               <input
                 v-model="form.username"
+                @blur="touched.username = true"
                 type="text"
                 class="form-control bg-white border-start-0 ps-2"
+                :class="{
+                  'is-invalid-input': !isUsernameValid && touched.username,
+                }"
                 placeholder="ex: student24"
                 required
               />
+            </div>
+            <div
+              v-if="!isUsernameValid && touched.username"
+              class="text-danger small mt-1"
+            >
+              <i class="fas fa-info-circle me-1"></i> Username-ul trebuie să
+              aibă minim 3 caractere.
             </div>
           </div>
 
@@ -113,18 +150,30 @@ const handleRegister = async () => {
               class="form-label small fw-bold text-secondary text-uppercase tracking-wide"
               >Email</label
             >
-            <div class="input-group">
+            <div
+              class="input-group"
+              :class="{ 'is-invalid-group': !isEmailValid && touched.email }"
+            >
               <span
                 class="input-group-text bg-white border-end-0 text-muted ps-3"
                 ><i class="fas fa-envelope"></i
               ></span>
               <input
                 v-model="form.email"
+                @blur="touched.email = true"
                 type="email"
                 class="form-control bg-white border-start-0 ps-2"
+                :class="{ 'is-invalid-input': !isEmailValid && touched.email }"
                 placeholder="nume@student.ro"
                 required
               />
+            </div>
+            <div
+              v-if="!isEmailValid && touched.email"
+              class="text-danger small mt-1"
+            >
+              <i class="fas fa-info-circle me-1"></i> Introduceți o adresă de
+              email validă.
             </div>
           </div>
 
@@ -134,18 +183,33 @@ const handleRegister = async () => {
                 class="form-label small fw-bold text-secondary text-uppercase tracking-wide"
                 >Parolă</label
               >
-              <div class="input-group">
+              <div
+                class="input-group"
+                :class="{
+                  'is-invalid-group': !isPasswordValid && touched.password,
+                }"
+              >
                 <span
                   class="input-group-text bg-white border-end-0 text-muted ps-3"
                   ><i class="fas fa-lock"></i
                 ></span>
                 <input
                   v-model="form.password"
+                  @blur="touched.password = true"
                   type="password"
                   class="form-control bg-white border-start-0 ps-2"
+                  :class="{
+                    'is-invalid-input': !isPasswordValid && touched.password,
+                  }"
                   placeholder="******"
                   required
                 />
+              </div>
+              <div
+                v-if="!isPasswordValid && touched.password"
+                class="text-danger small mt-1"
+              >
+                <i class="fas fa-info-circle me-1"></i> Minim 6 caractere.
               </div>
             </div>
             <div class="col-md-6">
@@ -153,14 +217,31 @@ const handleRegister = async () => {
                 class="form-label small fw-bold text-secondary text-uppercase tracking-wide"
                 >Confirmă</label
               >
-              <div class="input-group">
+              <div
+                class="input-group"
+                :class="{
+                  'is-invalid-group':
+                    !doPasswordsMatch && touched.confirmPassword,
+                }"
+              >
                 <input
                   v-model="form.confirmPassword"
+                  @blur="touched.confirmPassword = true"
                   type="password"
                   class="form-control bg-white ps-3"
+                  :class="{
+                    'is-invalid-input':
+                      !doPasswordsMatch && touched.confirmPassword,
+                  }"
                   placeholder="******"
                   required
                 />
+              </div>
+              <div
+                v-if="!doPasswordsMatch && touched.confirmPassword"
+                class="text-danger small mt-1"
+              >
+                <i class="fas fa-info-circle me-1"></i> Parolele nu coincid.
               </div>
             </div>
           </div>
@@ -172,7 +253,14 @@ const handleRegister = async () => {
               type="checkbox"
               id="termsCheck"
             />
-            <label class="form-check-label small text-muted" for="termsCheck">
+            <label
+              class="form-check-label small"
+              :class="{
+                'text-danger fw-bold': !form.agreed,
+                'text-muted': form.agreed,
+              }"
+              for="termsCheck"
+            >
               Sunt de acord cu
               <a href="#" class="text-dark fw-bold text-decoration-none"
                 >Termenii și Condițiile</a
@@ -183,7 +271,7 @@ const handleRegister = async () => {
           <button
             type="submit"
             class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm btn-hover-lift"
-            :disabled="isLoading"
+            :disabled="isLoading || !isFormValid"
           >
             <span
               v-if="isLoading"
@@ -238,7 +326,6 @@ const handleRegister = async () => {
   height: 500px;
   background: #bbf7d0;
 }
-
 .register-card {
   width: 100%;
   max-width: 460px;
@@ -247,7 +334,6 @@ const handleRegister = async () => {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
-
 .logo-circle {
   width: 70px;
   height: 70px;
@@ -271,7 +357,6 @@ const handleRegister = async () => {
     transform: translateY(0px);
   }
 }
-
 .input-group-text {
   border-color: #e2e8f0;
 }
@@ -280,11 +365,9 @@ const handleRegister = async () => {
   padding: 10px 0;
   color: #1e293b;
 }
-
 .form-control:not(.border-start-0) {
   padding-left: 12px;
 }
-
 .form-control:focus {
   box-shadow: none;
   border-color: #4f46e5;
@@ -296,12 +379,10 @@ const handleRegister = async () => {
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   border-radius: 0.375rem;
 }
-
 .form-check-input:checked {
   background-color: #4f46e5;
   border-color: #4f46e5;
 }
-
 .tracking-wide {
   letter-spacing: 0.05em;
 }
@@ -310,11 +391,10 @@ const handleRegister = async () => {
   border: none;
   transition: all 0.2s;
 }
-.btn-hover-lift:hover {
+.btn-hover-lift:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
 }
-
 .back-btn {
   transition: all 0.2s ease;
   cursor: pointer;
@@ -322,5 +402,19 @@ const handleRegister = async () => {
 .back-btn:hover {
   background-color: #f1f5f9 !important;
   transform: scale(1.1);
+}
+
+/* Stiluri noi adăugate pentru erorile de validare */
+.is-invalid-group {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+  border-radius: 0.375rem;
+}
+.is-invalid-group .input-group-text,
+.is-invalid-input {
+  border-color: #dc3545 !important;
+}
+.btn-primary:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
 }
 </style>

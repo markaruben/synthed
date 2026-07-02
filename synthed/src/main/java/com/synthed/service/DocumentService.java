@@ -29,9 +29,9 @@ public class DocumentService {
     private final AiService aiService;
     private final ObjectMapper objectMapper;
 
-    public DocumentSummaryDTO saveDocument(MultipartFile file, String username) {
-        User currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Unknown user: " + username));
+    public DocumentSummaryDTO saveDocument(MultipartFile file, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Unknown user: " + email));
 
         String content = pdfService.extractText(file);
 
@@ -39,7 +39,7 @@ public class DocumentService {
         doc.setFileName(file.getOriginalFilename());
         doc.setContent(content);
         doc.setUploadDate(LocalDateTime.now());
-        doc.setUser(currentUser);
+        doc.setUser(user);
 
         String textToProcess = content.length() > 500000 ? content.substring(0, 500000) : content;
 
@@ -90,15 +90,15 @@ public class DocumentService {
         return DocumentMapper.mapToSummary(savedDoc);
     }
 
-    public List<DocumentSummaryDTO> getAllDocuments(String username) {
-        return documentRepository.findAllByUser_Username(username).stream()
+    public List<DocumentSummaryDTO> getAllDocuments(String email) {
+        return documentRepository.findAllByUser_Email(email).stream()
                 .map(DocumentMapper::mapToSummary)
                 .collect(Collectors.toList());
     }
 
     public DocumentDTO getDocumentById(Long id) {
         Document document = documentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Documentul with " + id + " not found!"));
+                .orElseThrow(() -> new RuntimeException("Document with " + id + " not found!"));
         return DocumentMapper.mapToDetail(document);
     }
 

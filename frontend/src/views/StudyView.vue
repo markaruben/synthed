@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import confetti from "canvas-confetti";
+import api from "@/services/api";
 
 const route = useRoute();
 const router = useRouter();
@@ -25,6 +26,56 @@ const stats = ref({
   hard: 0,
 });
 
+const showPredictionModal = ref(false);
+const previousScore = ref("");
+const studyHours = ref("");
+const predictionResult = ref(null);
+const isPredicting = ref(false);
+
+const successRate = computed(() => {
+  if (allCards.value.length === 0) return 0;
+  return Math.round((stats.value.easy / allCards.value.length) * 100);
+});
+
+const openPrediction = () => {
+  showPredictionModal.value = true;
+};
+
+const submitPrediction = async () => {
+  isPredicting.value = true;
+
+  try {
+    const rawToken = localStorage.getItem("auth") || "";
+    const cleanToken = rawToken
+      .replace(/^Bearer\s*/i, "")
+      .replace(/[\r\n\s]+/g, "")
+      .trim();
+
+    const authHeader = `Bearer ${cleanToken}`;
+
+    const response = await api.post(
+      "/analytics/predict",
+      {
+        documentId: documentId,
+        flashcardSuccessRate: successRate.value,
+        previous_grade: parseFloat(previousScore.value),
+        study_hours: parseInt(studyHours.value),
+      },
+      {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    );
+
+    predictionResult.value = response.data.predicted_score;
+  } catch (err) {
+    console.error("Eroare la obținerea predicției:", err);
+  } finally {
+    isPredicting.value = false;
+  }
+};
+
 const currentCard = computed(() => {
   if (!activeCards.value || activeCards.value.length === 0) return null;
   return activeCards.value[currentIndex.value];
@@ -43,9 +94,7 @@ const fetchDocumentDetails = async () => {
   try {
     const response = await axios.get(
       `http://localhost:8080/api/documents/${documentId}`,
-      {
-        headers: { Authorization: authHeader },
-      },
+      { headers: { Authorization: authHeader } },
     );
 
     doc.value = response.data;
@@ -102,7 +151,6 @@ const reviewMissed = () => {
   currentIndex.value = 0;
   isFlipped.value = false;
   isFinished.value = false;
-  stats.value = { easy: 0, hard: 0 };
 };
 
 const restartSession = () => {
@@ -112,6 +160,11 @@ const restartSession = () => {
   isFlipped.value = false;
   isFinished.value = false;
   stats.value = { easy: 0, hard: 0 };
+
+  showPredictionModal.value = false;
+  predictionResult.value = null;
+  previousScore.value = "";
+  studyHours.value = "";
 };
 
 const triggerConfetti = () => {
@@ -152,6 +205,19 @@ const handleKeydown = (e) => {
     handleAnswer("hard");
   }
 };
+const isValidForm = computed(() => {
+  const score = parseFloat(previousScore.value);
+  const hours = parseInt(studyHours.value);
+
+  return (
+    !isNaN(score) &&
+    score >= 1 &&
+    score <= 10 &&
+    !isNaN(hours) &&
+    hours >= 0 &&
+    hours <= 168
+  );
+});
 
 onMounted(() => {
   fetchDocumentDetails();
@@ -239,51 +305,171 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div v-else-if="isFinished" class="text-center py-5">
+      <div
+        v-else-if="isFinished"
+        class="text-center py-5 position-relative z-1"
+      >
         <div class="mb-4">
           <i
-            v-if="missedCards.length === 0"
-            class="fas fa-trophy text-warning"
+            v-if="
+              missedCards.length === 0 &&
+              !showPredictionModal &&
+              predictionResult === null
+            "
+            class="fas fa-trophy text-warning animate-pop-in"
             style="font-size: 5rem"
           ></i>
           <i
-            v-else
+            v-else-if="missedCards.length > 0"
             class="fas fa-tasks text-primary"
             style="font-size: 5rem"
           ></i>
+          <i
+            v-else-if="showPredictionModal && predictionResult === null"
+            class="fas fa-brain text-primary animate-pop-in"
+            style="font-size: 5rem"
+          ></i>
+          <i
+            v-else-if="predictionResult !== null"
+            class="fas fa-chart-line text-success animate-pop-in"
+            style="font-size: 5rem"
+          ></i>
         </div>
-        <h2 class="fw-bold mb-3">
-          {{
-            missedCards.length === 0
-              ? "Felicitări! Ai reținut tot!"
-              : "Sesiune finalizată"
-          }}
-        </h2>
-        <p class="text-secondary mb-5">
-          Ai parcurs {{ activeCards.length }} carduri în această rundă.
-        </p>
 
-        <div
-          class="d-flex flex-column flex-sm-row justify-content-center gap-3 max-w-400 mx-auto"
-        >
-          <button
-            v-if="missedCards.length > 0"
-            @click="reviewMissed"
-            class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm px-4"
+        <div v-if="missedCards.length > 0">
+          <h2 class="fw-bold mb-3">Sesiune finalizată</h2>
+          <p class="text-secondary mb-5">
+            Ai parcurs {{ activeCards.length }} carduri în această rundă.
+          </p>
+          <div
+            class="d-flex flex-column flex-sm-row justify-content-center gap-3 max-w-400 mx-auto"
           >
-            <i class="fas fa-redo me-2"></i> Repetă cardurile greșite ({{
-              missedCards.length
-            }})
-          </button>
+            <button
+              @click="reviewMissed"
+              class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm px-4"
+            >
+              <i class="fas fa-redo me-2"></i> Repetă greșite ({{
+                missedCards.length
+              }})
+            </button>
+            <button
+              @click="restartSession"
+              class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
+            >
+              <i class="fas fa-sync-alt me-2"></i> Începe de la zero
+            </button>
+          </div>
+        </div>
 
-          <button
-            @click="restartSession"
-            class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
+        <div v-else class="mx-auto" style="max-width: 450px">
+          <div
+            v-if="!showPredictionModal && predictionResult === null"
+            class="animate-pop-in"
           >
-            <i class="fas fa-sync-alt me-2"></i> Începe de la zero ({{
-              allCards.length
-            }})
-          </button>
+            <h2 class="fw-bold mb-3">Felicitări! Ai reținut tot!</h2>
+            <p class="text-secondary mb-5">
+              Rata de asimilare:
+              <strong class="text-success">{{ successRate }}%</strong>
+            </p>
+            <div class="d-flex flex-column gap-3">
+              <button
+                @click="openPrediction"
+                class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-4 py-3"
+              >
+                <i class="fas fa-magic me-2"></i> Estimează Nota Finală
+              </button>
+              <button
+                @click="restartSession"
+                class="btn btn-outline-primary btn-lg rounded-pill fw-bold shadow-sm px-4 py-3"
+              >
+                <i class="fas fa-sync-alt me-2"></i> Începe de la zero
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="showPredictionModal && predictionResult === null"
+            class="bg-white p-4 p-md-5 rounded-5 shadow-lg border animate-pop-in"
+          >
+            <h3 class="fw-bold mb-3 text-dark">Analiză Predictivă</h3>
+            <p class="text-secondary mb-4 small">
+              Introdu datele pentru a rula modelul AI.
+            </p>
+
+            <div class="mb-3">
+              <input
+                v-model="previousScore"
+                type="number"
+                step="0.1"
+                class="form-control form-control-lg rounded-pill shadow-sm border-0 py-3 bg-light text-dark fw-bold"
+                placeholder="Media anterioară (1-10)"
+              />
+              <small
+                v-if="
+                  previousScore && (previousScore < 1 || previousScore > 10)
+                "
+                class="text-danger ps-3"
+              >
+                * Nota trebuie să fie între 1 și 10.
+              </small>
+            </div>
+
+            <div class="mb-4">
+              <input
+                v-model="studyHours"
+                type="number"
+                class="form-control form-control-lg rounded-pill shadow-sm border-0 py-3 bg-light text-dark fw-bold"
+                placeholder="Ore studiu / săptămână"
+              />
+              <small
+                v-if="studyHours && (studyHours < 0 || studyHours > 168)"
+                class="text-danger ps-3"
+              >
+                * Introdu un număr între 0 și 168.
+              </small>
+            </div>
+
+            <div class="d-flex flex-column gap-3 mt-4">
+              <button
+                @click="submitPrediction"
+                :disabled="isPredicting || !isValidForm"
+                class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4 py-3 w-100"
+              >
+                <span v-if="isPredicting"
+                  ><span class="spinner-border spinner-border-sm me-2"></span>Se
+                  calculează...</span
+                >
+                <span v-else
+                  ><i class="fas fa-calculator me-2"></i> Calculează Nota</span
+                >
+              </button>
+              <button
+                @click="showPredictionModal = false"
+                class="btn btn-link text-secondary text-decoration-none fw-bold"
+              >
+                Anulează
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="predictionResult !== null"
+            class="bg-white p-4 p-md-5 rounded-5 shadow-lg border animate-pop-in"
+          >
+            <h3 class="fw-bold mb-2 text-dark">Nota Estimată</h3>
+            <p class="text-secondary mb-4 small">
+              Conform analizei AI și telemetriei tale.
+            </p>
+            <div class="display-1 fw-bolder text-success mb-5">
+              {{ predictionResult }}
+            </div>
+            <button
+              @click="router.push('/dashboard')"
+              class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4 w-100 py-3"
+            >
+              <i class="fas fa-arrow-left me-2"></i> Spre Dashboard
+            </button>
+          </div>
         </div>
       </div>
 
@@ -347,7 +533,6 @@ onUnmounted(() => {
   overflow: hidden;
   position: relative;
 }
-
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -368,7 +553,6 @@ onUnmounted(() => {
   height: 500px;
   background: #d1fae5;
 }
-
 .progress-segment {
   height: 6px;
   background-color: #e2e8f0;
@@ -381,7 +565,6 @@ onUnmounted(() => {
 .progress-segment.current {
   background-color: #818cf8;
 }
-
 .scene {
   width: 100%;
   max-width: 600px;
@@ -399,7 +582,6 @@ onUnmounted(() => {
 .flashcard.is-flipped {
   transform: rotateY(180deg);
 }
-
 .card__face {
   position: absolute;
   width: 100%;
@@ -415,7 +597,6 @@ onUnmounted(() => {
   background: white;
   transform: rotateY(180deg);
 }
-
 .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
 }
@@ -428,7 +609,6 @@ onUnmounted(() => {
 .hover-scale:active {
   transform: scale(0.95);
 }
-
 .animate-pop-in {
   animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -442,11 +622,27 @@ onUnmounted(() => {
     transform: scale(1);
   }
 }
-
 .icon-circle {
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+input:focus {
+  box-shadow: none;
+  outline: none;
+  border-color: #4f46e5 !important;
+}
+input.form-control {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+  font-size: 0.95rem !important;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 576px) {
+  input.form-control {
+    font-size: 0.85rem !important;
+  }
 }
 </style>

@@ -1,31 +1,50 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import api from "@/services/api"; // Folosim noul interceptor
 
 const router = useRouter();
-const username = ref("");
+
+const email = ref("");
 const password = ref("");
 const isLoading = ref(false);
+const errorMessage = ref("");
+
+const emailTouched = ref(false);
+const passwordTouched = ref(false);
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const isEmailValid = computed(() => emailRegex.test(email.value));
+const isPasswordValid = computed(() => password.value.length >= 6);
+
+const isFormValid = computed(() => isEmailValid.value && isPasswordValid.value);
 
 const goHome = () => router.push("/");
 
 const handleLogin = async () => {
+  if (!isFormValid.value) return;
+
   isLoading.value = true;
+  errorMessage.value = "";
 
   try {
-    const authHeader = "Basic " + btoa(username.value + ":" + password.value);
-    await axios.get("http://localhost:8080/api/documents", {
-      headers: { Authorization: authHeader },
+    const response = await api.post("/auth/login", {
+      email: email.value,
+      password: password.value,
     });
 
-    localStorage.setItem("auth", authHeader);
-    localStorage.setItem("user", username.value);
+    const token = response.data.token || response.data;
 
-    window.addToast(`Bine ai revenit, ${username.value}!`, "success");
+    localStorage.setItem("auth", `Bearer ${token}`);
+    localStorage.setItem("user", email.value);
+
+    if (window.addToast) {
+      window.addToast(`Bine ai revenit, ${email.value}!`, "success");
+    }
     router.push("/dashboard");
   } catch (error) {
-    window.addToast("Username sau parolă incorectă.", "error");
+    errorMessage.value = "Email sau parolă incorectă.";
   } finally {
     isLoading.value = false;
   }
@@ -71,20 +90,33 @@ const handleLogin = async () => {
           <div class="mb-3">
             <label
               class="form-label small fw-bold text-secondary text-uppercase tracking-wide"
-              >Username</label
+              >Adresă de Email</label
             >
-            <div class="input-group">
+            <div
+              class="input-group"
+              :class="{ 'is-invalid-group': !isEmailValid && emailTouched }"
+            >
               <span
                 class="input-group-text bg-white border-end-0 text-muted ps-3"
-                ><i class="far fa-user"></i
-              ></span>
+              >
+                <i class="far fa-envelope"></i>
+              </span>
               <input
-                v-model="username"
-                type="text"
+                v-model="email"
+                @blur="emailTouched = true"
+                type="email"
                 class="form-control bg-white border-start-0 ps-2"
-                placeholder="ex: student"
+                :class="{ 'is-invalid-input': !isEmailValid && emailTouched }"
+                placeholder="ex: student@synthed.ro"
                 required
               />
+            </div>
+            <div
+              v-if="!isEmailValid && emailTouched"
+              class="text-danger small mt-1"
+            >
+              <i class="fas fa-info-circle me-1"></i> Introduceți o adresă de
+              email validă.
             </div>
           </div>
 
@@ -100,25 +132,42 @@ const handleLogin = async () => {
                 >Ai uitat?</a
               >
             </div>
-            <div class="input-group">
+            <div
+              class="input-group"
+              :class="{
+                'is-invalid-group': !isPasswordValid && passwordTouched,
+              }"
+            >
               <span
                 class="input-group-text bg-white border-end-0 text-muted ps-3"
-                ><i class="fas fa-lock"></i
-              ></span>
+              >
+                <i class="fas fa-lock"></i>
+              </span>
               <input
                 v-model="password"
+                @blur="passwordTouched = true"
                 type="password"
                 class="form-control bg-white border-start-0 ps-2"
-                placeholder="••••••"
+                :class="{
+                  'is-invalid-input': !isPasswordValid && passwordTouched,
+                }"
+                placeholder="••••••••"
                 required
               />
+            </div>
+            <div
+              v-if="!isPasswordValid && passwordTouched"
+              class="text-danger small mt-1"
+            >
+              <i class="fas fa-info-circle me-1"></i> Parola trebuie să aibă
+              minim 6 caractere.
             </div>
           </div>
 
           <button
             type="submit"
             class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm btn-hover-lift"
-            :disabled="isLoading"
+            :disabled="isLoading || !isFormValid"
           >
             <span
               v-if="isLoading"
@@ -149,6 +198,7 @@ const handleLogin = async () => {
 </template>
 
 <style scoped>
+/* Păstrăm stilurile tale originale */
 .login-wrapper {
   background-color: #f8fafc;
 }
@@ -173,7 +223,6 @@ const handleLogin = async () => {
   height: 400px;
   background: #bbf7d0;
 }
-
 .login-card {
   width: 100%;
   max-width: 420px;
@@ -182,7 +231,6 @@ const handleLogin = async () => {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
-
 .logo-circle {
   width: 70px;
   height: 70px;
@@ -206,7 +254,6 @@ const handleLogin = async () => {
     transform: translateY(0px);
   }
 }
-
 .input-group-text {
   border-color: #e2e8f0;
 }
@@ -226,7 +273,6 @@ const handleLogin = async () => {
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   border-radius: 0.375rem;
 }
-
 .tracking-wide {
   letter-spacing: 0.05em;
 }
@@ -235,11 +281,10 @@ const handleLogin = async () => {
   border: none;
   transition: all 0.2s;
 }
-.btn-hover-lift:hover {
+.btn-hover-lift:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
 }
-
 .back-btn {
   transition: all 0.2s ease;
   cursor: pointer;
@@ -247,5 +292,19 @@ const handleLogin = async () => {
 .back-btn:hover {
   background-color: #f1f5f9 !important;
   transform: scale(1.1);
+}
+
+/* Stiluri noi adăugate pentru erorile de validare */
+.is-invalid-group {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+  border-radius: 0.375rem;
+}
+.is-invalid-group .input-group-text,
+.is-invalid-input {
+  border-color: #dc3545 !important;
+}
+.btn-primary:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
 }
 </style>

@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
-    List<Document> findAllByUser_Username(String username);
+    List<Document> findAllByUser_Email(String email);
 }

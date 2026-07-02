@@ -29,22 +29,12 @@ const goToLogin = () => router.push("/login");
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        ></button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium small gap-lg-4">
-            <li class="nav-item">
-              <a class="nav-link text-secondary hover-dark" href="#features"
-                >Arhitectură & Funcționalități</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-secondary hover-dark" href="#faq"
-                >Detalii Tehnice (FAQ)</a
-              >
-            </li>
+            <li class="nav-item"></li>
+            <li class="nav-item"></li>
           </ul>
           <div class="d-flex gap-2">
             <button
@@ -71,13 +61,6 @@ const goToLogin = () => router.push("/login");
       <div class="container position-relative z-2 mt-5 pt-5">
         <div class="row align-items-center">
           <div class="col-lg-5 mb-5 mb-lg-0 text-center text-lg-start">
-            <div
-              class="d-inline-flex align-items-center border border-dark border-opacity-10 bg-white px-3 py-1 rounded-pill mb-4 small fw-bold shadow-sm"
-            >
-              <span class="dot bg-success me-2 animate-pulse"></span> Prototip
-              Academic v1.0
-            </div>
-
             <h1 class="display-4 fw-bolder text-dark mb-4 lh-sm tracking-tight">
               Sinteza cursurilor <br />
               asistată de
@@ -99,20 +82,12 @@ const goToLogin = () => router.push("/login");
               >
                 Testare Sistem
               </button>
-              <button
-                class="btn btn-white border btn-lg rounded-pill px-4 fw-medium text-dark shadow-sm"
-              >
-                <i class="fas fa-file-pdf me-2 text-muted"></i> Vezi
-                Documentația
-              </button>
             </div>
 
             <div class="mt-5 text-muted small fw-medium">
-              <i class="fas fa-shield-alt text-success me-1"></i> Procesare
-              Securizată
+              <i></i> Procesare Securizată
               <span class="mx-2">•</span>
-              <i class="fas fa-network-wired text-success me-1"></i> Arhitectură
-              AI Hibridă
+              <i></i> Arhitectură AI Hibridă
             </div>
           </div>
 
@@ -184,197 +159,6 @@ const goToLogin = () => router.push("/login");
       </div>
     </header>
 
-    <div class="py-4 bg-white border-top border-bottom overflow-hidden">
-      <div class="container text-center">
-        <p class="small fw-bold text-uppercase text-muted mb-4 tracking-widest">
-          Mediu Tehnologic Utilizat
-        </p>
-        <div
-          class="d-flex justify-content-center align-items-center flex-wrap gap-5 opacity-50 grayscale-logos"
-        >
-          <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fab fa-vuejs"></i> Vue.js 3
-          </div>
-          <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fab fa-java"></i> Spring Boot
-          </div>
-          <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fas fa-database"></i> PostgreSQL
-          </div>
-          <div class="d-flex align-items-center gap-2 fw-bold fs-5">
-            <i class="fas fa-robot"></i> OpenAI API
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <section id="features" class="py-5 bg-light">
-      <div class="container py-5">
-        <div class="text-center mb-5 mw-600 mx-auto">
-          <h2 class="fw-bold display-6 mb-3">Arhitectura Sistemului.</h2>
-          <p class="text-secondary lead">
-            Soluția tehnică integrează procesarea robustă a documentelor cu
-            determinismul structural al modelelor de limbaj moderne.
-          </p>
-        </div>
-
-        <div class="row g-4">
-          <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
-              <div class="icon-box bg-primary bg-opacity-10 text-primary mb-4">
-                <i class="fas fa-cogs"></i>
-              </div>
-              <h5 class="fw-bold">Extracție Date (PDFBox)</h5>
-              <p class="text-muted small">
-                Utilizarea bibliotecii Apache PDFBox pentru parsarea și
-                extragerea textului brut din documentele încărcate, pregătind
-                datele pentru faza de inferență.
-              </p>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
-              <div class="icon-box bg-success bg-opacity-10 text-success mb-4">
-                <i class="fas fa-code-branch"></i>
-              </div>
-              <h5 class="fw-bold">Determinism JSON</h5>
-              <p class="text-muted small">
-                Implementarea tehnicilor avansate de Prompt Engineering și JSON
-                Mode pentru a garanta structura datelor primite de la agentul
-                AI.
-              </p>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm p-4 rounded-4 hover-up">
-              <div class="icon-box bg-warning bg-opacity-10 text-warning mb-4">
-                <i class="fas fa-lock"></i>
-              </div>
-              <h5 class="fw-bold">Securitate REST API</h5>
-              <p class="text-muted small">
-                Comunicația între interfața clientului și backend este protejată
-                prin mecanisme standard de autentificare și validare a
-                token-urilor.
-              </p>
-            </div>
-          </div>
-
-          <div class="col-lg-8">
-            <div
-              class="card h-100 border-0 shadow-sm p-5 rounded-4 bg-dark text-white position-relative overflow-hidden"
-            >
-              <div class="position-relative z-2">
-                <h3 class="fw-bold mb-3">Privacy & Data Flow</h3>
-                <p class="text-white-50 mb-0" style="max-width: 500px">
-                  Documentele utilizatorilor sunt procesate tranzitoriu. Textul
-                  este mapat prin intermediul DTO-urilor, trimis secvențial
-                  către API-ul LLM, și stocat relațional exclusiv pentru
-                  sesiunea de studiu a utilizatorului autentificat.
-                </p>
-              </div>
-              <i
-                class="fas fa-server position-absolute bottom-0 end-0 text-white opacity-10"
-                style="font-size: 15rem; transform: translate(20%, 20%)"
-              ></i>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div
-              class="card h-100 border-0 shadow-sm p-4 rounded-4 bg-primary text-white text-center d-flex flex-column justify-content-center align-items-center hover-scale"
-            >
-              <i class="fas fa-microchip fs-1 mb-3 opacity-75"></i>
-              <h3 class="fw-bolder mb-0">GPT-4o</h3>
-              <p class="text-white-50 small mt-2">Model de Infernță Integrat</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="faq" class="py-5 bg-white border-top">
-      <div class="container py-4 mw-800 mx-auto">
-        <h3 class="fw-bold text-center mb-5">Detalii Tehnice</h3>
-
-        <div
-          class="accordion accordion-flush bg-white rounded-4 shadow-sm border"
-          id="accordionFAQ"
-        >
-          <div class="accordion-item rounded-top-4">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button fw-bold collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#flush-collapseOne"
-              >
-                Ce model de Inteligență Artificială folosiți?
-              </button>
-            </h2>
-            <div
-              id="flush-collapseOne"
-              class="accordion-collapse collapse"
-              data-bs-parent="#accordionFAQ"
-            >
-              <div class="accordion-body text-muted small">
-                Platforma utilizează modele LLM de ultimă generație (ex: OpenAI
-                API gpt-4o-mini) integrate în backend-ul Java Spring Boot.
-                Modelul este constrâns arhitectural să răspundă strict în format
-                JSON pentru o parsare robustă.
-              </div>
-            </div>
-          </div>
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button fw-bold collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#flush-collapseTwo"
-              >
-                Cum sunt gestionate limitările de context (Context Window)?
-              </button>
-            </h2>
-            <div
-              id="flush-collapseTwo"
-              class="accordion-collapse collapse"
-              data-bs-parent="#accordionFAQ"
-            >
-              <div class="accordion-body text-muted small">
-                În versiunea curentă a prototipului, textul extras din documente
-                este limitat la un număr maxim de caractere sigure pentru a
-                preveni erorile de tip "Token Limit Exceeded". Ca direcție
-                viitoare, se propune o arhitectură RAG cu Semantic Chunking.
-              </div>
-            </div>
-          </div>
-          <div class="accordion-item rounded-bottom-4">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button fw-bold collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#flush-collapseThree"
-              >
-                Care este fluxul de prelucrare a unui document?
-              </button>
-            </h2>
-            <div
-              id="flush-collapseThree"
-              class="accordion-collapse collapse"
-              data-bs-parent="#accordionFAQ"
-            >
-              <div class="accordion-body text-muted small">
-                1. Încărcare din Client (Vue.js) -> 2. Controller REST (Spring
-                Boot) -> 3. Extragere text (PDFBox) -> 4. Generare Prompt
-                (AiService) -> 5. Răspuns AI și Parsare JSON (Jackson) -> 6.
-                Persistență (PostgreSQL) -> 7. Randare interactivă UI.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <footer class="bg-dark text-white pt-5 pb-4">
       <div class="container">
         <div class="row g-4 mb-5">
@@ -387,55 +171,6 @@ const goToLogin = () => router.push("/login");
               lucrarea de disertație, demonstrând integrarea arhitecturilor web
               moderne cu inteligența artificială generativă.
             </p>
-          </div>
-          <div class="col-6 col-lg-3">
-            <h6 class="fw-bold mb-3">Arhitectură</h6>
-            <ul
-              class="list-unstyled small text-white-50 d-flex flex-column gap-2"
-            >
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Frontend (Vue 3)</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Backend (Spring Boot)</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Bază de date (PostgreSQL)</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  >Integrare LLM</a
-                >
-              </li>
-            </ul>
-          </div>
-          <div class="col-6 col-lg-4">
-            <h6 class="fw-bold mb-3">Informații Academice</h6>
-            <ul
-              class="list-unstyled small text-white-50 d-flex flex-column gap-2"
-            >
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  ><i class="fas fa-file-alt me-2"></i>Documentație Proiect</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  ><i class="fab fa-github me-2"></i>Cod Sursă</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-reset text-decoration-none hover-white"
-                  ><i class="fas fa-envelope me-2"></i>Contact Student</a
-                >
-              </li>
-            </ul>
           </div>
         </div>
 
