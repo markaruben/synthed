@@ -4,56 +4,21 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const goToRegister = () => router.push("/register");
 const goToLogin = () => router.push("/login");
+const goToDashboard = () => router.push("/dashboard");
+
+const handleTestSystemClick = () => {
+  const token = localStorage.getItem("auth");
+
+  if (token) {
+    goToDashboard();
+  } else {
+    goToLogin();
+  }
+};
 </script>
 
 <template>
   <div class="landing-page">
-    <nav class="navbar navbar-expand-lg fixed-top glass-nav py-3">
-      <div class="container">
-        <a
-          class="navbar-brand fw-bold fs-4 text-dark d-flex align-items-center gap-2"
-          href="#"
-        >
-          <img
-            src="@/assets/logo.png"
-            alt="SynthEd Logo"
-            width="40"
-            height="40"
-            class="rounded-3"
-          />
-          <span class="tracking-tight">SynthEd</span>
-        </a>
-
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        ></button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-medium small gap-lg-4">
-            <li class="nav-item"></li>
-            <li class="nav-item"></li>
-          </ul>
-          <div class="d-flex gap-2">
-            <button
-              class="btn btn-link text-decoration-none text-dark fw-bold px-3"
-              @click="goToLogin"
-            >
-              Autentificare
-            </button>
-            <button
-              class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm btn-hover-lift"
-              @click="goToRegister"
-            >
-              Accesează Platforma
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
     <header class="hero-section position-relative overflow-hidden pt-5 pb-5">
       <div class="ambient-light-1"></div>
       <div class="ambient-light-2"></div>
@@ -77,7 +42,7 @@ const goToLogin = () => router.push("/login");
               class="d-flex gap-3 justify-content-center justify-content-lg-start"
             >
               <button
-                @click="goToRegister"
+                @click="handleTestSystemClick"
                 class="btn btn-dark btn-lg rounded-pill px-5 fw-bold shadow-lg btn-hover-scale"
               >
                 Testare Sistem
@@ -158,31 +123,6 @@ const goToLogin = () => router.push("/login");
         </div>
       </div>
     </header>
-
-    <footer class="bg-dark text-white pt-5 pb-4">
-      <div class="container">
-        <div class="row g-4 mb-5">
-          <div class="col-lg-5">
-            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
-              <i class="fas fa-graduation-cap text-primary"></i> SynthEd
-            </h5>
-            <p class="text-white-50 small pe-lg-5">
-              Acest proiect reprezintă o aplicație practică dezvoltată pentru
-              lucrarea de disertație, demonstrând integrarea arhitecturilor web
-              moderne cu inteligența artificială generativă.
-            </p>
-          </div>
-        </div>
-
-        <div
-          class="border-top border-secondary pt-4 text-center small text-white-50"
-        >
-          <div>
-            &copy; 2026 Proiect de Disertație. Toate drepturile rezervate.
-          </div>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 

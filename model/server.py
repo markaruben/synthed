@@ -15,8 +15,10 @@ class PredictionRequest(BaseModel):
 
 @app.post("/predict")
 def predict(data: PredictionRequest):
-    prediction = model.predict([[data.study_hours, data.previous_grade]])
-    return {"predicted_score": round(float(prediction[0]), 2)}
+    scaled_previous_grade = data.previous_grade * 10
+    prediction = model.predict([[data.study_hours, scaled_previous_grade]])
+    final_score = float(prediction[0]) / 10
+    return {"predicted_score": round(final_score, 2)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

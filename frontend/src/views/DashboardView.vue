@@ -2,11 +2,29 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/services/api";
+import ConfirmationModal from "@/components/ConfirmationModal.vue";
+
 const router = useRouter();
 const username = localStorage.getItem("user") || "Student";
 const documents = ref([]);
 const selectedFile = ref(null);
 const isUploading = ref(false);
+const userScores = ref([]);
+
+// Variabile pentru modalul de ștergere document
+const showDeleteDocModal = ref(false);
+const docToDeleteId = ref(null);
+const isDeletingDoc = ref(false);
+
+const promptDeleteDocument = (docId) => {
+  docToDeleteId.value = docId;
+  showDeleteDocModal.value = true;
+};
+
+const closeDeleteDocModal = () => {
+  showDeleteDocModal.value = false;
+  docToDeleteId.value = null;
+};
 
 const fetchDocuments = async () => {
   try {
@@ -60,19 +78,25 @@ const uploadDocument = async () => {
   }
 };
 
-const deleteDocument = async (id) => {
-  if (!confirm("Sigur vrei să ștergi acest curs?")) return;
+// Modificat pentru a folosi modalul în loc de window.confirm
+const deleteDocument = async () => {
+  if (!docToDeleteId.value) return;
 
+  isDeletingDoc.value = true;
   try {
-    await api.delete(`/documents/${id}`);
+    await api.delete(`/documents/${docToDeleteId.value}`);
 
     if (window.addToast) window.addToast("Curs șters definitiv.", "success");
     await fetchDocuments();
+    closeDeleteDocModal(); // Închidem modalul dacă are succes
   } catch (e) {
     if (window.addToast)
       window.addToast("Nu s-a putut șterge cursul.", "error");
+  } finally {
+    isDeletingDoc.value = false;
   }
 };
+
 const clearFile = () => {
   selectedFile.value = null;
   const fileInput = document.getElementById("fileInput");
@@ -83,43 +107,55 @@ const clearFile = () => {
 
 onMounted(() => {
   fetchDocuments();
+  fetchScores();
 });
+
+const fetchScores = async () => {
+  try {
+    const response = await api.get("/analytics/scores");
+    userScores.value = response.data;
+  } catch (error) {
+    console.error("Eroare la încărcarea notelor:", error);
+  }
+};
+
+const getScoreForDocument = (docId) => {
+  if (!Array.isArray(userScores.value)) {
+    return "Neevaluat";
+  }
+
+  const record = userScores.value.find((score) => score.documentId == docId);
+  return record ? record.predictedScore.toFixed(2) : "Neevaluat";
+};
+
+const getLastTestDate = (docId) => {
+  if (!Array.isArray(userScores.value)) return "Niciun test susținut";
+
+  const record = userScores.value.find((score) => score.documentId == docId);
+
+  if (record && record.createdAt) {
+    return new Date(record.createdAt).toLocaleDateString("ro-RO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
+  return "Niciun test susținut";
+};
+
+const getScoreClass = (scoreStr) => {
+  if (scoreStr === "Neevaluat") return "badge-neutral";
+
+  const score = parseFloat(scoreStr);
+  if (score >= 8) return "badge-success";
+  if (score >= 5) return "badge-warning";
+  return "badge-danger";
+};
 </script>
 
 <template>
   <div class="dashboard-container min-vh-100">
-    <nav class="navbar navbar-expand-lg fixed-top px-4 py-3 glass-nav">
-      <div class="d-flex align-items-center gap-3">
-        <div class="logo-wrapper bg-primary text-white rounded-3 shadow-sm">
-          <i class="fas fa-brain"></i>
-        </div>
-        <span class="fw-bold fs-5 tracking-tight text-dark">SynthEd</span>
-      </div>
-
-      <div class="ms-auto d-flex align-items-center gap-4">
-        <div
-          class="d-none d-md-flex flex-column text-end lh-1 cursor-pointer profile-section"
-          @click="router.push('/profile')"
-          title="Vezi Profilul"
-        >
-          <span class="fw-bold text-dark small transition-colors">{{
-            username
-          }}</span>
-          <span class="text-muted" style="font-size: 0.7rem">Free Tier</span>
-        </div>
-
-        <div class="dropdown">
-          <button
-            @click="logout"
-            class="btn btn-white rounded-circle shadow-sm border icon-btn hover-scale"
-            title="Deconectare"
-          >
-            <i class="fas fa-sign-out-alt text-danger"></i>
-          </button>
-        </div>
-      </div>
-    </nav>
-
     <div class="container pt-5 mt-5 pb-5">
       <div class="row mb-5 fade-in-up">
         <div class="col-lg-8 mb-4 mb-lg-0">
@@ -282,7 +318,7 @@ onMounted(() => {
                 @click="router.push(`/study/${doc.id}`)"
               >
                 <button
-                  @click.stop="deleteDocument(doc.id)"
+                  @click.stop="promptDeleteDocument(doc.id)"
                   class="delete-btn btn btn-white text-danger shadow-sm rounded-circle position-absolute top-0 end-0 m-2"
                   title="Șterge"
                 >
@@ -305,9 +341,17 @@ onMounted(() => {
                     <div
                       class="d-flex align-items-center gap-2 small text-muted"
                     >
-                      <i class="far fa-calendar-alt"></i>
-                      {{ new Date(doc.uploadDate).toLocaleDateString("ro-RO") }}
+                      Ultima dată de testare: {{ getLastTestDate(doc.id) }}
                     </div>
+                    <span
+                      :class="[
+                        'score-badge mt-1',
+                        getScoreClass(getScoreForDocument(doc.id)),
+                      ]"
+                    >
+                      Ultima notă estimată:
+                      {{ getScoreForDocument(doc.id) }}
+                    </span>
                   </div>
                 </div>
 
@@ -315,10 +359,15 @@ onMounted(() => {
                   <div
                     class="d-flex justify-content-between align-items-center mb-1"
                   >
-                    <span
-                      class="badge bg-success bg-opacity-10 text-success rounded-pill px-2"
-                      >Ready</span
-                    >
+                    <div class="d-flex align-items-center gap-2">
+                      <button
+                        @click.stop="router.push(`/edit-document/${doc.id}`)"
+                        class="btn btn-outline-secondary py-0 px-2 rounded-pill shadow-sm"
+                        style="font-size: 0.75rem; height: 24px"
+                      >
+                        <i class="fas fa-edit"></i> Editează flashcard-uri
+                      </button>
+                    </div>
                     <small class="fw-bold text-primary hover-link"
                       >Start Studiu <i class="fas fa-arrow-right ms-1"></i
                     ></small>
@@ -330,6 +379,15 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <ConfirmationModal
+      :isVisible="showDeleteDocModal"
+      :isLoading="isDeletingDoc"
+      title="Șterge Cursul"
+      message="Vrei să ștergi acest curs cu tot cu flashcard-urile generate? Datele nu vor mai putea fi recuperate."
+      @confirm="deleteDocument"
+      @cancel="closeDeleteDocModal"
+    />
   </div>
 </template>
 
@@ -482,5 +540,39 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-neutral {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px dashed #9ca3af;
+  box-shadow: none;
 }
 </style>

@@ -53,12 +53,15 @@ const submitPrediction = async () => {
 
     const authHeader = `Bearer ${cleanToken}`;
 
+    const flashcardGrade = successRate.value / 10;
+    const userPreviousScore = parseFloat(previousScore.value);
+    const effectiveGrade = (userPreviousScore + flashcardGrade) / 2;
+
     const response = await api.post(
       "/analytics/predict",
       {
         documentId: documentId,
-        flashcardSuccessRate: successRate.value,
-        previous_grade: parseFloat(previousScore.value),
+        previous_grade: effectiveGrade,
         study_hours: parseInt(studyHours.value),
       },
       {
@@ -219,6 +222,12 @@ const isValidForm = computed(() => {
   );
 });
 
+const isTestFinished = computed(() => {
+  return (
+    flashcards.value.length > 0 && currentIndex.value >= flashcards.value.length
+  );
+});
+
 onMounted(() => {
   fetchDocumentDetails();
   window.addEventListener("keydown", handleKeydown);
@@ -230,41 +239,42 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="study-container min-vh-100 d-flex flex-column">
-    <nav class="navbar px-4 py-3 position-absolute w-100" style="z-index: 10">
-      <div class="d-flex align-items-center gap-3 w-100">
-        <button
-          @click="router.push('/dashboard')"
-          class="btn btn-white rounded-circle shadow-sm border"
-          style="width: 40px; height: 40px"
-        >
-          <i class="fas fa-times text-secondary"></i>
-        </button>
+  <div class="study-container min-vh-100 d-flex flex-column position-relative">
+    <div
+      class="study-header d-flex align-items-center gap-3 w-100 px-4 mb-4 z-1"
+      style="margin-top: 1rem"
+    >
+      <button
+        @click="router.push('/dashboard')"
+        class="btn btn-white rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
+        style="width: 45px; height: 45px"
+        title="Înapoi la Dashboard"
+      >
+        <i class="fas fa-arrow-left text-secondary"></i>
+      </button>
 
+      <div
+        class="flex-grow-1 mx-3 d-none d-md-flex gap-1"
+        v-if="activeCards.length > 0 && !isFinished"
+      >
         <div
-          class="flex-grow-1 mx-3 d-none d-md-flex gap-1"
-          v-if="activeCards.length > 0 && !isFinished"
-        >
-          <div
-            v-for="(c, idx) in activeCards"
-            :key="idx"
-            class="progress-segment rounded-pill"
-            :class="{
-              active: idx <= currentIndex,
-              current: idx === currentIndex,
-            }"
-          ></div>
-        </div>
-
-        <div
-          class="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill"
-          v-if="activeCards.length > 0 && !isFinished"
-        >
-          {{ currentIndex + 1 }} / {{ activeCards.length }}
-        </div>
+          v-for="(c, idx) in activeCards"
+          :key="idx"
+          class="progress-segment rounded-pill"
+          :class="{
+            active: idx <= currentIndex,
+            current: idx === currentIndex,
+          }"
+        ></div>
       </div>
-    </nav>
 
+      <div
+        class="badge bg-white text-dark shadow-sm border px-3 py-2 rounded-pill fs-6"
+        v-if="activeCards.length > 0 && !isFinished"
+      >
+        {{ currentIndex + 1 }} / {{ activeCards.length }}
+      </div>
+    </div>
     <div
       class="flex-grow-1 d-flex align-items-center justify-content-center p-4 position-relative overflow-hidden"
     >
@@ -320,8 +330,12 @@ onUnmounted(() => {
             style="font-size: 5rem"
           ></i>
           <i
-            v-else-if="missedCards.length > 0"
-            class="fas fa-tasks text-primary"
+            v-else-if="
+              missedCards.length > 0 &&
+              !showPredictionModal &&
+              predictionResult === null
+            "
+            class="fas fa-tasks text-primary animate-pop-in"
             style="font-size: 5rem"
           ></i>
           <i
@@ -336,41 +350,26 @@ onUnmounted(() => {
           ></i>
         </div>
 
-        <div v-if="missedCards.length > 0">
-          <h2 class="fw-bold mb-3">Sesiune finalizată</h2>
-          <p class="text-secondary mb-5">
-            Ai parcurs {{ activeCards.length }} carduri în această rundă.
-          </p>
-          <div
-            class="d-flex flex-column flex-sm-row justify-content-center gap-3 max-w-400 mx-auto"
-          >
-            <button
-              @click="reviewMissed"
-              class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm px-4"
-            >
-              <i class="fas fa-redo me-2"></i> Repetă greșite ({{
-                missedCards.length
-              }})
-            </button>
-            <button
-              @click="restartSession"
-              class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
-            >
-              <i class="fas fa-sync-alt me-2"></i> Începe de la zero
-            </button>
-          </div>
-        </div>
-
-        <div v-else class="mx-auto" style="max-width: 450px">
+        <div class="mx-auto" style="max-width: 450px">
           <div
             v-if="!showPredictionModal && predictionResult === null"
             class="animate-pop-in"
           >
-            <h2 class="fw-bold mb-3">Felicitări! Ai reținut tot!</h2>
-            <p class="text-secondary mb-5">
-              Rata de asimilare:
-              <strong class="text-success">{{ successRate }}%</strong>
-            </p>
+            <div v-if="missedCards.length > 0">
+              <h2 class="fw-bold mb-3">Sesiune finalizată</h2>
+              <p class="text-secondary mb-5">
+                Ai parcurs {{ activeCards.length }} carduri. Rata de succes:
+                <strong class="text-primary">{{ successRate }}%</strong>
+              </p>
+            </div>
+            <div v-else>
+              <h2 class="fw-bold mb-3">Felicitări! Ai reținut tot!</h2>
+              <p class="text-secondary mb-5">
+                Rata de asimilare:
+                <strong class="text-success">{{ successRate }}%</strong>
+              </p>
+            </div>
+
             <div class="d-flex flex-column gap-3">
               <button
                 @click="openPrediction"
@@ -378,6 +377,17 @@ onUnmounted(() => {
               >
                 <i class="fas fa-magic me-2"></i> Estimează Nota Finală
               </button>
+
+              <button
+                v-if="missedCards.length > 0"
+                @click="reviewMissed"
+                class="btn btn-warning btn-lg rounded-pill fw-bold shadow-sm px-4 py-3"
+              >
+                <i class="fas fa-redo me-2"></i> Repetă greșite ({{
+                  missedCards.length
+                }})
+              </button>
+
               <button
                 @click="restartSession"
                 class="btn btn-outline-primary btn-lg rounded-pill fw-bold shadow-sm px-4 py-3"
@@ -388,7 +398,7 @@ onUnmounted(() => {
           </div>
 
           <div
-            v-if="showPredictionModal && predictionResult === null"
+            v-else-if="showPredictionModal && predictionResult === null"
             class="bg-white p-4 p-md-5 rounded-5 shadow-lg border animate-pop-in"
           >
             <h3 class="fw-bold mb-3 text-dark">Analiză Predictivă</h3>
@@ -435,13 +445,13 @@ onUnmounted(() => {
                 :disabled="isPredicting || !isValidForm"
                 class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4 py-3 w-100"
               >
-                <span v-if="isPredicting"
-                  ><span class="spinner-border spinner-border-sm me-2"></span>Se
-                  calculează...</span
-                >
-                <span v-else
-                  ><i class="fas fa-calculator me-2"></i> Calculează Nota</span
-                >
+                <span v-if="isPredicting">
+                  <span class="spinner-border spinner-border-sm me-2"></span>Se
+                  calculează...
+                </span>
+                <span v-else>
+                  <i class="fas fa-calculator me-2"></i> Calculează Nota
+                </span>
               </button>
               <button
                 @click="showPredictionModal = false"
@@ -453,7 +463,7 @@ onUnmounted(() => {
           </div>
 
           <div
-            v-if="predictionResult !== null"
+            v-else-if="predictionResult !== null"
             class="bg-white p-4 p-md-5 rounded-5 shadow-lg border animate-pop-in"
           >
             <h3 class="fw-bold mb-2 text-dark">Nota Estimată</h3>
