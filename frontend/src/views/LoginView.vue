@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import api from "@/services/api"; // Folosim noul interceptor
+import api from "@/services/api";
 
 const router = useRouter();
 

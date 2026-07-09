@@ -11,7 +11,6 @@ const selectedFile = ref(null);
 const isUploading = ref(false);
 const userScores = ref([]);
 
-// Variabile pentru modalul de ștergere document
 const showDeleteDocModal = ref(false);
 const docToDeleteId = ref(null);
 const isDeletingDoc = ref(false);
@@ -78,7 +77,6 @@ const uploadDocument = async () => {
   }
 };
 
-// Modificat pentru a folosi modalul în loc de window.confirm
 const deleteDocument = async () => {
   if (!docToDeleteId.value) return;
 
@@ -88,7 +86,7 @@ const deleteDocument = async () => {
 
     if (window.addToast) window.addToast("Curs șters definitiv.", "success");
     await fetchDocuments();
-    closeDeleteDocModal(); // Închidem modalul dacă are succes
+    closeDeleteDocModal();
   } catch (e) {
     if (window.addToast)
       window.addToast("Nu s-a putut șterge cursul.", "error");

@@ -152,7 +152,6 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "@/services/api";
-// Importăm componenta modal
 import ConfirmationModal from "@/components/ConfirmationModal.vue";
 
 const route = useRoute();
@@ -165,7 +164,6 @@ const editingId = ref(null);
 const editForm = ref({ question: "", answer: "" });
 const isSaving = ref(false);
 
-// Variabile noi pentru modalul de ștergere flashcard
 const showDeleteCardModal = ref(false);
 const cardToDeleteId = ref(null);
 const isDeletingCard = ref(false);
@@ -247,7 +245,6 @@ const saveEdit = async (cardId) => {
   }
 };
 
-// Functii noi pentru gestionarea modalului de ștergere
 const promptDeleteCard = (cardId) => {
   cardToDeleteId.value = cardId;
   showDeleteCardModal.value = true;
@@ -279,7 +276,7 @@ const executeDeleteCard = async () => {
       (c) => c.id !== cardId,
     );
 
-    closeDeleteCardModal(); // Închidem modalul după succes
+    closeDeleteCardModal();
 
     if (window.addToast) {
       window.addToast("Flashcard șters.", "success");
